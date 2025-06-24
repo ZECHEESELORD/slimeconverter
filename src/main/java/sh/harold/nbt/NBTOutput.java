@@ -1,10 +1,16 @@
 package sh.harold.nbt;
 
-import java.io.*;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 public final class NBTOutput {
     private final DataOutput out;
-    public NBTOutput(OutputStream out) { this.out = new DataOutputStream(out); }
+
+    public NBTOutput(OutputStream out) {
+        this.out = new DataOutputStream(out);
+    }
 
     public void writeTag(NBTTag tag) throws IOException {
         if (tag == null) {

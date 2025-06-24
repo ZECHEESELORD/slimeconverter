@@ -1,11 +1,20 @@
 package sh.harold.nbt;
 
-import java.io.*;
-import java.util.*;
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public final class NBTInput {
     private final DataInput in;
-    public NBTInput(InputStream in) { this.in = new DataInputStream(in); }
+
+    public NBTInput(InputStream in) {
+        this.in = new DataInputStream(in);
+    }
 
     public NBTTag readTag() throws IOException {
         byte type = in.readByte();
@@ -16,16 +25,26 @@ public final class NBTInput {
 
     private NBTTag readPayload(byte type, String name) throws IOException {
         switch (type) {
-            case 0x0A: return new NBTCompound(name, readCompound());
-            case 0x09: return new NBTList(name, readList());
-            case 0x0B: return new NBTLongArray(name, readLongArray());
-            case 0x08: return new NBTString(name, readUTF());
-            case 0x03: return new NBTInt(name, in.readInt());
-            case 0x01: return new NBTByte(name, in.readByte());
-            case 0x02: return new NBTShort(name, in.readShort());
-            case 0x04: return new NBTLong(name, in.readLong());
-            case 0x0C: return new NBTIntArray(name, readIntArray());
-            default: throw new IOException("Unsupported NBT tag type: " + type);
+            case 0x0A:
+                return new NBTCompound(name, readCompound());
+            case 0x09:
+                return new NBTList(name, readList());
+            case 0x0B:
+                return new NBTLongArray(name, readLongArray());
+            case 0x08:
+                return new NBTString(name, readUTF());
+            case 0x03:
+                return new NBTInt(name, in.readInt());
+            case 0x01:
+                return new NBTByte(name, in.readByte());
+            case 0x02:
+                return new NBTShort(name, in.readShort());
+            case 0x04:
+                return new NBTLong(name, in.readLong());
+            case 0x0C:
+                return new NBTIntArray(name, readIntArray());
+            default:
+                throw new IOException("Unsupported NBT tag type: " + type);
         }
     }
 
