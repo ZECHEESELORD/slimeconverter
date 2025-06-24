@@ -1,45 +1,49 @@
 package sh.harold;
 
 import sh.harold.nbt.*;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public record ChunkData(
-    int x,
-    int z,
-    List<SectionData> sections,
-    NBTCompound heightmaps,
-    List<NBTCompound> tileEntities,
-    List<NBTCompound> entities,
-    NBTCompound extra
+        int x,
+        int z,
+        List<SectionData> sections,
+        NBTCompound heightmaps,
+        List<NBTCompound> tileEntities,
+        List<NBTCompound> entities,
+        NBTCompound extra
 ) {
     public static ChunkData fromNBT(NBTCompound root) {
-        int x = ((NBTInt) root.value.get("xPos")).value;
-        int z = ((NBTInt) root.value.get("zPos")).value;
+        int x = ((NBTInt) root.get("xPos").orElseThrow()).value;
+        int z = ((NBTInt) root.get("zPos").orElseThrow()).value;
         List<SectionData> sections = new ArrayList<>();
-        NBTList nbtSections = (NBTList) root.value.get("sections");
-        if (nbtSections != null) {
-            for (NBTTag tag : nbtSections.value) {
+        Optional<NBTList> nbtSectionsOpt = root.get("sections").map(NBTList.class::cast);
+        if (nbtSectionsOpt.isPresent()) {
+            for (NBTTag tag : nbtSectionsOpt.get().value) {
                 NBTCompound section = (NBTCompound) tag;
-                int y = ((NBTByte) section.value.get("Y")).value;
-                boolean hasSky = section.value.containsKey("SkyLight");
-                byte[] sky = hasSky ? ((NBTByteArray) section.value.get("SkyLight")).value : null;
-                boolean hasBlock = section.value.containsKey("BlockLight");
-                byte[] block = hasBlock ? ((NBTByteArray) section.value.get("BlockLight")).value : null;
-                NBTCompound blockStates = (NBTCompound) section.value.get("block_states");
-                NBTCompound biomes = (NBTCompound) section.value.get("biomes");
+                int y = ((NBTByte) section.get("Y").orElseThrow()).value;
+                boolean hasSky = section.containsKey("SkyLight");
+                byte[] sky = hasSky ? ((NBTByteArray) section.get("SkyLight").orElseThrow()).value : null;
+                boolean hasBlock = section.containsKey("BlockLight");
+                byte[] block = hasBlock ? ((NBTByteArray) section.get("BlockLight").orElseThrow()).value : null;
+                NBTCompound blockStates = section.get("block_states").map(NBTCompound.class::cast).orElse(null);
+                NBTCompound biomes = section.get("biomes").map(NBTCompound.class::cast).orElse(null);
                 sections.add(new SectionData(y, hasSky, sky, hasBlock, block, blockStates, biomes));
             }
         }
-        NBTCompound heightmaps = (NBTCompound) root.value.get("Heightmaps");
+        NBTCompound heightmaps = root.get("Heightmaps").map(NBTCompound.class::cast).orElse(null);
         List<NBTCompound> tileEntities = extractCompoundList(root, "tileEntities");
         List<NBTCompound> entities = extractCompoundList(root, "entities");
-        NBTCompound extra = (NBTCompound) root.value.getOrDefault("extra", null);
+        NBTCompound extra = root.get("extra").map(NBTCompound.class::cast).orElse(null);
         return new ChunkData(x, z, sections, heightmaps, tileEntities, entities, extra);
     }
+
     private static List<NBTCompound> extractCompoundList(NBTCompound root, String key) {
-        NBTCompound global = (NBTCompound) root.value.get(key);
+        NBTCompound global = root.get(key).map(NBTCompound.class::cast).orElse(null);
         if (global == null) return List.of();
-        NBTList list = (NBTList) global.value.get(key);
+        NBTList list = global.get(key).map(NBTList.class::cast).orElse(null);
         if (list == null) return List.of();
         List<NBTCompound> out = new ArrayList<>();
         for (NBTTag tag : list.value) out.add((NBTCompound) tag);
@@ -48,11 +52,12 @@ public record ChunkData(
 }
 
 record SectionData(
-    int y,
-    boolean hasSkyLight,
-    byte[] skyLight,
-    boolean hasBlockLight,
-    byte[] blockLight,
-    NBTCompound blockStates,
-    NBTCompound biomes
-) {}
+        int y,
+        boolean hasSkyLight,
+        byte[] skyLight,
+        boolean hasBlockLight,
+        byte[] blockLight,
+        NBTCompound blockStates,
+        NBTCompound biomes
+) {
+}
