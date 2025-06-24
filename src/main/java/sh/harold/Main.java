@@ -22,7 +22,10 @@ public class Main {
                 case "1" -> convertAnvilToSlime(scanner);
                 case "2" -> verifySlime(scanner);
                 case "3" -> printSpec();
-                case "0" -> { System.out.println(CYAN + "Exiting." + RESET); return; }
+                case "0" -> {
+                    System.out.println(CYAN + "Exiting." + RESET);
+                    return;
+                }
                 default -> System.out.println(RED + "Invalid option." + RESET);
             }
         }
@@ -46,10 +49,17 @@ public class Main {
         System.out.println(CYAN + "Reading chunks from Anvil world: " + inputWorld.getAbsolutePath() + RESET);
         List<String> globalPalette = new ArrayList<>();
         Map<String, Integer> paletteIndexMap = new HashMap<>();
-        List<ChunkData> chunks = AnvilReader.loadChunks(inputWorld, globalPalette, paletteIndexMap);
+        List<ChunkData> chunks = AnvilReader.loadChunks(inputWorld);
         System.out.println(CYAN + "Writing Slime world: " + outputSlime.getAbsolutePath() + RESET);
-        int worldVersion = 3216; // TODO: Detect or configure world version
+        File levelDat = new File(inputWorld, "level.dat");
+        int worldVersion = 3216;
         try {
+            if (levelDat.exists()) {
+                worldVersion = DataVersionUtil.readDataVersion(levelDat);
+                System.out.println(CYAN + "Detected world DataVersion: " + worldVersion + RESET);
+            } else {
+                System.out.println(YELLOW + "Warning: level.dat not found, using default DataVersion 3216" + RESET);
+            }
             SlimeWorldWriter.write(chunks, worldVersion, outputSlime);
             System.out.println(GREEN + "Finished writing Slime world: " + outputSlime.getAbsolutePath() + RESET);
         } catch (Exception e) {
