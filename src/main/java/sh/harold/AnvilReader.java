@@ -1,4 +1,4 @@
-package dev.harolddoes;
+package sh.harold;
 
 import java.io.File;
 import java.util.*;
@@ -14,12 +14,12 @@ public final class AnvilReader {
 
         File[] regionFiles = new File(worldDirectory, "region").listFiles((dir, name) -> name.endsWith(".mca"));
         if (regionFiles == null) {
-            System.err.println("[AnvilReader] No region files found.");
+            System.err.println("No region files found.");
             return allChunks;
         }
 
         for (File regionFile : regionFiles) {
-            System.out.println("[AnvilReader] Reading region file: " + regionFile.getName());
+            System.out.println("Reading region file: " + regionFile.getName());
             List<ChunkData> chunks = AnvilChunkParser.readRegion(regionFile, globalPalette, paletteIndexMap);
             allChunks.addAll(chunks);
         }

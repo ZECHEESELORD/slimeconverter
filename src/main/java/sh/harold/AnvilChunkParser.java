@@ -1,4 +1,4 @@
-package dev.harolddoes;
+package sh.harold;
 
 import net.querz.nbt.io.NBTDeserializer;
 import net.querz.nbt.io.NamedTag;
@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
+import sh.harold.nbt.*;
 
 
 public final class AnvilChunkParser {
@@ -48,7 +49,8 @@ public final class AnvilChunkParser {
                     continue;
                 }
 
-                ChunkData data = ChunkData.fromNBT(level, globalPalette, paletteIndexMap);
+                NBTTag levelTag = NBTUtil.convertQuerzToInternal(level);
+                ChunkData data = ChunkData.fromNBT((NBTCompound) levelTag);
                 if (data != null) {
                     chunks.add(data);
                     System.out.println("[DEBUG] Chunk " + i + " parsed successfully");
@@ -56,7 +58,7 @@ public final class AnvilChunkParser {
             }
 
         } catch (Exception e) {
-            System.err.println("[AnvilChunkParser] Failed to parse region " + mcaFile.getName());
+            System.err.println("Failed to parse region " + mcaFile.getName());
             e.printStackTrace();
         }
 

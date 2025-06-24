@@ -1,4 +1,4 @@
-package dev.harolddoes;
+package sh.harold;
 
 import com.github.luben.zstd.Zstd;
 
