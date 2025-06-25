@@ -51,15 +51,8 @@ public class Main {
         Map<String, Integer> paletteIndexMap = new HashMap<>();
         List<ChunkData> chunks = AnvilReader.loadChunks(inputWorld);
         System.out.println(CYAN + "Writing Slime world: " + outputSlime.getAbsolutePath() + RESET);
-        File levelDat = new File(inputWorld, "level.dat");
-        int worldVersion = 3216;
+        int worldVersion = 37233; // Hardcoded for Minecraft 1.21.6
         try {
-            if (levelDat.exists()) {
-                worldVersion = DataVersionUtil.readDataVersion(levelDat);
-                System.out.println(CYAN + "Detected world DataVersion: " + worldVersion + RESET);
-            } else {
-                System.out.println(YELLOW + "Warning: level.dat not found, using default DataVersion 3216" + RESET);
-            }
             SlimeWorldWriter.write(chunks, worldVersion, outputSlime);
             System.out.println(GREEN + "Finished writing Slime world: " + outputSlime.getAbsolutePath() + RESET);
         } catch (Exception e) {

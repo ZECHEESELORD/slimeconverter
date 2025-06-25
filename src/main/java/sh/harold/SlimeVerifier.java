@@ -1,7 +1,6 @@
 package sh.harold;
 
 import java.io.*;
-import java.util.zip.Inflater;
 
 public final class SlimeVerifier {
     private SlimeVerifier() {
@@ -36,13 +35,8 @@ public final class SlimeVerifier {
 
     private static boolean verifyZstd(byte[] compressed, int expectedUncompressed) {
         try {
-            // Use Zstd if available, else stub with Inflater for placeholder
-            Inflater inflater = new Inflater();
-            inflater.setInput(compressed);
-            byte[] buf = new byte[expectedUncompressed];
-            int len = inflater.inflate(buf);
-            inflater.end();
-            return len == expectedUncompressed;
+            byte[] buf = ZstdUtil.decompress(compressed, expectedUncompressed);
+            return buf.length == expectedUncompressed;
         } catch (Exception e) {
             return false;
         }

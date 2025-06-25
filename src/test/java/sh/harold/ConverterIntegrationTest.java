@@ -1,24 +1,35 @@
 package sh.harold;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.List;
+import java.util.logging.*;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ConverterIntegrationTest {
+    @BeforeAll
+    public static void setupLogging() {
+        Logger rootLogger = Logger.getLogger("");
+        for (Handler handler : rootLogger.getHandlers()) {
+            handler.setLevel(Level.INFO);
+        }
+        rootLogger.setLevel(Level.INFO);
+    }
+
     @Test
     void testMcaToSlimeConversion() throws Exception {
-        File mca = new File("src/test/resources/test_region.mca");
+        File worldDir = new File("src/test/resources/world");
+        File mca = new File(worldDir, "region/r.0.0.mca");
         assertTrue(mca.exists(), "Test MCA file missing");
-        File worldDir = mca.getParentFile();
-        int dataVersion = DataVersionUtil.readDataVersion(new File(worldDir, "../level.dat"));
+        int dataVersion = 37233; // Minecraft 1.21.6 data version
         List<ChunkData> chunks = AnvilReader.loadChunks(worldDir);
-        assertFalse(chunks.isEmpty(), "No chunks loaded from test MCA");
+        assertFalse(chunks.isEmpty(), "No chunks loaded from test world");
         File slime = File.createTempFile("test_output", ".slime");
         SlimeWorldWriter.write(chunks, dataVersion, slime);
         assertTrue(slime.exists() && slime.length() > 0, "No .slime file written");

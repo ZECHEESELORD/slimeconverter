@@ -34,6 +34,8 @@ public final class NBTOutput {
             case 0x02 -> out.writeShort(((NBTShort) tag).value);
             case 0x04 -> out.writeLong(((NBTLong) tag).value);
             case 0x0C -> writeIntArray((NBTIntArray) tag);
+            case 0x06 -> out.writeDouble(((NBTDouble) tag).value);
+            case 0x05 -> out.writeFloat(((NBTFloat) tag).value);
             default -> throw new IOException("Unsupported NBT tag type: " + type);
         }
     }
@@ -81,6 +83,8 @@ public final class NBTOutput {
             case NBTShort ignored -> 0x02;
             case NBTLong ignored -> 0x04;
             case NBTIntArray ignored -> 0x0C;
+            case NBTDouble ignored -> 0x06;
+            case NBTFloat ignored -> 0x05;
             default -> throw new IllegalArgumentException("Unknown tag: " + tag.getClass());
         };
     }

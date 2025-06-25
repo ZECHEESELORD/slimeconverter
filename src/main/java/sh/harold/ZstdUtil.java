@@ -12,4 +12,7 @@ public final class ZstdUtil {
         return Zstd.compress(data);
     }
 
+    public static byte[] decompress(byte[] data, int uncompressedSize) {
+        return Zstd.decompress(data, uncompressedSize);
+    }
 }

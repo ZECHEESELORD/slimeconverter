@@ -16,37 +16,37 @@ public record ChunkData(
         NBTCompound extra
 ) {
     public static ChunkData fromNBT(NBTCompound root) {
-        int x = ((NBTInt) root.get("xPos").orElseThrow()).value;
-        int z = ((NBTInt) root.get("zPos").orElseThrow()).value;
+        int x = root.get("xPos").filter(NBTInt.class::isInstance).map(NBTInt.class::cast).map(n -> n.value).orElseThrow();
+        int z = root.get("zPos").filter(NBTInt.class::isInstance).map(NBTInt.class::cast).map(n -> n.value).orElseThrow();
         List<SectionData> sections = new ArrayList<>();
-        Optional<NBTList> nbtSectionsOpt = root.get("sections").map(NBTList.class::cast);
+        Optional<NBTList> nbtSectionsOpt = root.get("sections").filter(NBTList.class::isInstance).map(NBTList.class::cast);
         if (nbtSectionsOpt.isPresent()) {
             for (NBTTag tag : nbtSectionsOpt.get().value) {
-                NBTCompound section = (NBTCompound) tag;
-                int y = ((NBTByte) section.get("Y").orElseThrow()).value;
+                if (!(tag instanceof NBTCompound section)) continue;
+                int y = section.get("Y").filter(NBTByte.class::isInstance).map(NBTByte.class::cast).map(n -> n.value).orElse((byte) 0);
                 boolean hasSky = section.containsKey("SkyLight");
-                byte[] sky = hasSky ? ((NBTByteArray) section.get("SkyLight").orElseThrow()).value : null;
+                byte[] sky = hasSky ? section.get("SkyLight").filter(NBTByteArray.class::isInstance).map(NBTByteArray.class::cast).map(n -> n.value).orElse(null) : null;
                 boolean hasBlock = section.containsKey("BlockLight");
-                byte[] block = hasBlock ? ((NBTByteArray) section.get("BlockLight").orElseThrow()).value : null;
-                NBTCompound blockStates = section.get("block_states").map(NBTCompound.class::cast).orElse(null);
-                NBTCompound biomes = section.get("biomes").map(NBTCompound.class::cast).orElse(null);
+                byte[] block = hasBlock ? section.get("BlockLight").filter(NBTByteArray.class::isInstance).map(NBTByteArray.class::cast).map(n -> n.value).orElse(null) : null;
+                NBTCompound blockStates = section.get("block_states").filter(NBTCompound.class::isInstance).map(NBTCompound.class::cast).orElse(null);
+                NBTCompound biomes = section.get("biomes").filter(NBTCompound.class::isInstance).map(NBTCompound.class::cast).orElse(null);
                 sections.add(new SectionData(y, hasSky, sky, hasBlock, block, blockStates, biomes));
             }
         }
-        NBTCompound heightmaps = root.get("Heightmaps").map(NBTCompound.class::cast).orElse(null);
+        NBTCompound heightmaps = root.get("Heightmaps").filter(NBTCompound.class::isInstance).map(NBTCompound.class::cast).orElse(null);
         List<NBTCompound> tileEntities = extractCompoundList(root, "tileEntities");
         List<NBTCompound> entities = extractCompoundList(root, "entities");
-        NBTCompound extra = root.get("extra").map(NBTCompound.class::cast).orElse(null);
+        NBTCompound extra = root.get("extra").filter(NBTCompound.class::isInstance).map(NBTCompound.class::cast).orElse(null);
         return new ChunkData(x, z, sections, heightmaps, tileEntities, entities, extra);
     }
 
     private static List<NBTCompound> extractCompoundList(NBTCompound root, String key) {
-        NBTCompound global = root.get(key).map(NBTCompound.class::cast).orElse(null);
-        if (global == null) return List.of();
-        NBTList list = global.get(key).map(NBTList.class::cast).orElse(null);
+        NBTList list = root.get(key).map(NBTList.class::cast).orElse(null);
         if (list == null) return List.of();
         List<NBTCompound> out = new ArrayList<>();
-        for (NBTTag tag : list.value) out.add((NBTCompound) tag);
+        for (NBTTag tag : list.value) {
+            if (tag instanceof NBTCompound compound) out.add(compound);
+        }
         return out;
     }
 }
